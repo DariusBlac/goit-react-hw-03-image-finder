@@ -1,0 +1,8 @@
+.button {
+  display: block;
+  margin: 0 auto;
+  width: 150px;
+  height: 30px;
+  background-color: blanchedalmond;
+  border-radius: 5px;
+}
