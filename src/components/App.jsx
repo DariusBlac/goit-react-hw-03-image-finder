@@ -1,8 +1,9 @@
 import { Component } from 'react';
-import { Searchbar } from './Searchbar/Searchbar';
+import { SearchBar } from './Searchbar/Searchbar';
 import { searchPhoto } from 'API/pixabay';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Button } from './Button/Button';
+import { Modal } from './Modal/Modal';
 
 export class App extends Component {
   state = {
@@ -10,23 +11,26 @@ export class App extends Component {
     page: 1,
     isLoading: false,
     arrImage: [],
+    loadMore: false,
+    showModal: false,
+    largeImage: '',
+    description: '',
   };
-
-  componentDidMount() {
-    // const { q, page } = this.state;
-    // searchPhoto(q, page).then(res => console.log(res));
-  }
 
   componentDidUpdate(prevProps, prevState) {
     const { q, page, arrImage } = this.state;
     if (prevState.q !== q || prevState.page !== page) {
-      searchPhoto(q, page).then(res => {
-        console.log(res);
-        this.setState({ arrImage: [...arrImage, ...res.hits] });
-      });
+      this.setState({ isLoading: true });
+      searchPhoto(q, page)
+        .then(res => {
+          this.setState({
+            arrImage: [...arrImage, ...res.hits],
+            loadMore: page < Math.ceil(res.totalHits / 12),
+          });
+        })
+        .catch(error => console.log(error))
+        .finally(() => this.setState({ isLoading: false }));
     }
-
-    console.log(this.state);
   }
 
   handleSubmit = event => {
@@ -34,6 +38,7 @@ export class App extends Component {
 
     const { value } = event.target.query;
     this.setState({ q: value, page: 1, arrImage: [] });
+    event.currentTarget.reset();
   };
 
   handleClick = () => {
@@ -43,12 +48,28 @@ export class App extends Component {
     });
   };
 
+  openModal = (url, desc) => {
+    this.setState({ showModal: true, largeImage: url, description: desc });
+  };
+
+  closeModal = () => {
+    this.setState({ showModal: false });
+  };
+
   render() {
     return (
       <>
-        <Searchbar handleSubmit={this.handleSubmit} />
-        <ImageGallery array={this.state.arrImage} />
-        <Button handleClick={this.handleClick} />
+        <SearchBar handleSubmit={this.handleSubmit} />
+        <ImageGallery array={this.state.arrImage} openModal={this.openModal} />
+        {/* {this.state.isLoading &&} */}
+        {this.state.showModal && (
+          <Modal
+            src={this.state.largeImage}
+            alt={this.state.description}
+            closeModal={this.closeModal}
+          />
+        )}
+        {this.state.loadMore && <Button handleClick={this.handleClick} />}
       </>
     );
   }

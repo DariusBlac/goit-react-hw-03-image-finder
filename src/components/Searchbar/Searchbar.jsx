@@ -1,6 +1,6 @@
 import css from './Searchbar.module.css';
 
-export const Searchbar = ({ handleSubmit }) => {
+export const SearchBar = ({ handleSubmit }) => {
   return (
     <header className={css.searchbar}>
       <form className={css.form} onSubmit={handleSubmit}>
@@ -12,6 +12,9 @@ export const Searchbar = ({ handleSubmit }) => {
           name="query"
           className={css.input}
           type="text"
+          autocomplete="off"
+          autofocus
+          required
           placeholder="Search images and photos"
         />
       </form>
