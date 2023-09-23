@@ -4,6 +4,7 @@ import { searchPhoto } from 'API/pixabay';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Button } from './Button/Button';
 import { Modal } from './Modal/Modal';
+import { Loader } from './Loader/Loader';
 
 export class App extends Component {
   state = {
@@ -20,18 +21,24 @@ export class App extends Component {
   componentDidUpdate(prevProps, prevState) {
     const { q, page, arrImage } = this.state;
     if (prevState.q !== q || prevState.page !== page) {
-      this.setState({ isLoading: true });
-      searchPhoto(q, page)
-        .then(res => {
-          this.setState({
-            arrImage: [...arrImage, ...res.hits],
-            loadMore: page < Math.ceil(res.totalHits / 12),
-          });
-        })
-        .catch(error => console.log(error))
-        .finally(() => this.setState({ isLoading: false }));
+      this.fetchPhotos(q, page, arrImage);
     }
   }
+
+  fetchPhotos = async (q, page, arr) => {
+    try {
+      this.setState({ isLoading: true });
+      const data = await searchPhoto(q, page);
+      this.setState({
+        arrImage: [...arr, ...data.hits],
+        loadMore: page < Math.ceil(data.totalHits / 12),
+      });
+    } catch (error) {
+      console.log(error);
+    } finally {
+      this.setState({ isLoading: false });
+    }
+  };
 
   handleSubmit = event => {
     event.preventDefault();
@@ -43,7 +50,6 @@ export class App extends Component {
 
   handleClick = () => {
     this.setState(prevState => {
-      console.log(prevState);
       return { page: prevState.page + 1 };
     });
   };
@@ -57,19 +63,28 @@ export class App extends Component {
   };
 
   render() {
+    const {
+      arrImage,
+      isLoading,
+      largeImage,
+      showModal,
+      description,
+      loadMore,
+    } = this.state;
     return (
       <>
         <SearchBar handleSubmit={this.handleSubmit} />
-        <ImageGallery array={this.state.arrImage} openModal={this.openModal} />
-        {/* {this.state.isLoading &&} */}
-        {this.state.showModal && (
+        <ImageGallery array={arrImage} openModal={this.openModal} />
+        {isLoading && <Loader />}
+
+        {showModal && (
           <Modal
-            src={this.state.largeImage}
-            alt={this.state.description}
+            src={largeImage}
+            alt={description}
             closeModal={this.closeModal}
           />
         )}
-        {this.state.loadMore && <Button handleClick={this.handleClick} />}
+        {loadMore && <Button handleClick={this.handleClick} />}
       </>
     );
   }
