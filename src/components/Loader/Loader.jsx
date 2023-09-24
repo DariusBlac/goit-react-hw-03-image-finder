@@ -11,6 +11,7 @@ export const Loader = () => {
         display: 'block',
         marginLeft: 'auto',
         marginRight: 'auto',
+        marginTop: '10px',
       }}
       wrapperClass="wrapper"
       colors={['#306cce', '#72a1ed']}

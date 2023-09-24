@@ -40,12 +40,8 @@ export class App extends Component {
     }
   };
 
-  handleSubmit = event => {
-    event.preventDefault();
-
-    const { value } = event.target.query;
+  handleSubmit = value => {
     this.setState({ q: value, page: 1, arrImage: [] });
-    event.currentTarget.reset();
   };
 
   handleClick = () => {
